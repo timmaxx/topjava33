@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.javawebinar.topjava.util.TimeUtil.isBetweenHalfOpen;
 
@@ -30,6 +31,12 @@ public class UserMealsUtil {
         mealsToByCyclesFromTopJava.forEach(System.out::println);
 
         // System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
+
+        List<UserMealWithExcess> mealsToByStreams = filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
+        mealsToByStreams.forEach(System.out::println);
+
+        List<UserMealWithExcess> mealsToByStreamsFromTopJava = filteredByStreamsFromTopJava(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
+        mealsToByStreamsFromTopJava.forEach(System.out::println);
     }
 
     public static List<UserMealWithExcess> filteredByCycles(
@@ -38,15 +45,7 @@ public class UserMealsUtil {
         for (UserMeal userMeal : meals) {
             localDate_Integer_Map.put(
                     userMeal.getDate(),
-                    userMeal.getCalories() +
-/*
-                            (localDate_Integer_Map.containsKey(userMeal.getDate()) ?
-                                    localDate_Integer_Map.get(userMeal.getDate()) :
-                                    0
-                            )
-*/
-                            (localDate_Integer_Map.getOrDefault(userMeal.getDate(), 0)
-                            )
+                    userMeal.getCalories() + localDate_Integer_Map.getOrDefault(userMeal.getDate(), 0)
             );
         }
 
@@ -88,7 +87,46 @@ public class UserMealsUtil {
         return mealsTo;
     }
 
-    //  Этот метод для упрощения предложен разработчиками TopJava. Я сделал альтернативный конструктор.
+    public static List<UserMealWithExcess> filteredByStreams(
+            List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        Map<LocalDate, Integer> localDate_Integer_Map = meals
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                UserMeal::getDate,      //  m -> m.getDate(),
+                                UserMeal::getCalories,  //  m -> m.getCalories(),
+                                Integer::sum            //  (c1, c2) -> c1 + c2
+                        )
+                );
+
+        return meals
+                .stream()
+                .filter(m -> isBetweenHalfOpen(m.getTime(), startTime, endTime))
+                .map(meal -> new UserMealWithExcess(
+                        meal,
+                        localDate_Integer_Map.get(meal.getDate()) > caloriesPerDay)
+                )
+                .collect(Collectors.toList());
+    }
+
+    public static List<UserMealWithExcess> filteredByStreamsFromTopJava(
+            List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        Map<LocalDate, Integer> caloriesSumByDate = meals.stream()
+                .collect(
+                        Collectors.groupingBy(UserMeal::getDate, Collectors.summingInt(UserMeal::getCalories))
+//                      Collectors.toMap(Meal::getDate, Meal::getCalories, Integer::sum)
+                );
+
+        return meals.stream()
+                .filter(meal -> isBetweenHalfOpen(meal.getTime(), startTime, endTime))
+                .map(meal -> createTo(
+                        meal,
+                        caloriesSumByDate.get(meal.getDate()) > caloriesPerDay)
+                )
+                .collect(Collectors.toList());
+    }
+
+    //  Этот метод для упрощения предложен разработчиками TopJava. Я сделал альтернативный конструктор UserMealWithExcess.
     private static UserMealWithExcess createTo(UserMeal meal, boolean excess) {
         return new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess);
     }
