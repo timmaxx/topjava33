@@ -18,6 +18,14 @@ public class UserMealWithExcess {
         this.excess = excess;
     }
 
+    //  Наличие такого конструктора делает зависимым этот класс от UserMeal.
+    //  Возможно это не правильно?
+    //  Также см.
+    //  private static UserMealWithExcess :: UserMealWithExcess createTo(UserMeal meal, boolean excess)
+    public UserMealWithExcess(UserMeal userMeal, boolean excess) {
+        this(userMeal.getDateTime(), userMeal.getDescription(), userMeal.getCalories(), excess);
+    }
+
     @Override
     public String toString() {
         return "UserMealWithExcess{" +
