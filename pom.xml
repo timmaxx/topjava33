@@ -15,6 +15,7 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <!-- Logging -->
         <logback.version>1.2.13</logback.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -45,15 +46,16 @@
         <!-- Logging with SLF4J & LogBack -->
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <artifactId>slf4j-api</artifactId> <!-- При компиляции компилятор будет ориентироваться на интерфейсы, описанные в этом модуле. -->
             <version>${slf4j.version}</version>
+            <scope>compile</scope>  <!-- Этот тег по умолчанию (т.е. его можно удалить). -->
         </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <artifactId>logback-classic</artifactId> <!-- А вот при исполнении, будут задействованы реализации интерфейсов slf4j-api, которые в этом модуле есть. -->
             <version>${logback.version}</version>
-            <scope>runtime</scope>
+            <scope>runtime</scope> <!-- Наличие этого тега задаёт модуль, в котором будут искаться реализации, необходимые для выполнения. -->
         </dependency>
 
         <!--Web-->
@@ -62,6 +64,12 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 
