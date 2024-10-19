@@ -27,17 +27,18 @@ public class MealServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
+        String id = request.getParameter("id");
 
-        Meal meal = new Meal(null,
+        Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")));
 
-        log.info("Create {}", meal);
+        log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
         int intId = repository.save(meal).getId();
-        log.info("Meal with id={} was created", intId);
+        log.info("Meal with id={} was {}", intId, meal.isNew() ? "created" : "updated");
 
         response.sendRedirect("meals");
     }
@@ -56,9 +57,20 @@ public class MealServlet extends HttpServlet {
                 response.sendRedirect("meals");
                 break;
             case "create":
-                final Meal meal = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
-                request.setAttribute("meal", meal);
+                final Meal mealForCreating = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
+                request.setAttribute("meal", mealForCreating);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
+                break;
+            case "update":
+                int idForUpdating = getId(request);
+                final Meal mealForUpdating = repository.get(idForUpdating);
+                if (mealForUpdating == null) {
+                    log.warn("Meal with id={} is not exists", idForUpdating);
+                    response.sendRedirect("meals");
+                } else {
+                    request.setAttribute("meal", mealForUpdating);
+                    request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
+                }
                 break;
             default:
                 log.info("getAll");

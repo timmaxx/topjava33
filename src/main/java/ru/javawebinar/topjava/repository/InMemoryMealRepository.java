@@ -33,6 +33,11 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     @Override
+    public Meal get(int id) {
+        return repository.get(id);
+    }
+
+    @Override
     public Collection<Meal> getAll() {
         return repository.values();
     }
