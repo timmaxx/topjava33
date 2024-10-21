@@ -37,8 +37,8 @@ public class MealServlet extends HttpServlet {
                 Integer.parseInt(request.getParameter("calories")));
 
         log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-        int intId = repository.save(meal).getId();
-        log.info("Meal with id={} was {}", intId, meal.isNew() ? "created" : "updated");
+        repository.save(meal).getId();
+        log.info("Actual {}", meal);
 
         response.sendRedirect("meals");
     }
@@ -58,6 +58,7 @@ public class MealServlet extends HttpServlet {
                 break;
             case "create":
                 final Meal mealForCreating = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
+                log.info("Prepare meal for inserting with default fields {}", mealForCreating);
                 request.setAttribute("meal", mealForCreating);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
@@ -68,6 +69,7 @@ public class MealServlet extends HttpServlet {
                     log.warn("Meal with id={} is not exists", idForUpdating);
                     response.sendRedirect("meals");
                 } else {
+                    log.info("Prepare meal for updating {}", mealForUpdating);
                     request.setAttribute("meal", mealForUpdating);
                     request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 }
