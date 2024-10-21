@@ -29,6 +29,9 @@ public class Meal {
     }
 
     public void setId(Integer id) {
+        if (this.id != null) {
+            throw new RuntimeException("You cannot change id if it is not null.");
+        }
         this.id = id;
     }
 
