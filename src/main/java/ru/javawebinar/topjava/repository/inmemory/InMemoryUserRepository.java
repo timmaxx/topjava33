@@ -13,12 +13,20 @@ public class InMemoryUserRepository extends InMemoryBaseRepository<User> impleme
     @Override
     public List<User> getAll() {
         log.info("getAll");
-        return Collections.emptyList();
+        return repository.values()
+                .stream()
+                .sorted(Comparator.comparing(User::getName).thenComparing(User::getEmail))
+                .collect(Collectors.toList());
     }
 
     @Override
     public User getByEmail(String email) {
         log.info("getByEmail {}", email);
-        return null;
+        return repository.values()
+                .stream()
+                .filter(u -> u.getEmail().equals(email))
+                .findAny()
+                .orElse(null)
+                ;
     }
 }
