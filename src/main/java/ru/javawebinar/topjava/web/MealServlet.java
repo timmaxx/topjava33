@@ -12,10 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.function.Predicate;
 
+import static ru.javawebinar.topjava.util.DateTimeUtil.*;
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
 
 public class MealServlet extends HttpServlet {
@@ -70,6 +74,30 @@ public class MealServlet extends HttpServlet {
                         controller.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
+                break;
+            case "filter":
+                log.info("getByFilter");
+                LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
+                LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
+                LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
+                LocalTime endTime = parseLocalTime(request.getParameter("endTime"));
+                startDate = startDate == null ? MIN_DATE : startDate;
+                endDate = endDate == null ? MAX_DATE : endDate;
+                LocalDate finalStartDate = startDate;
+                LocalDate finalEndDate = endDate;
+                startTime = startTime == null ? MIN_TIME : startTime;
+                endTime = endTime == null ? MAX_TIME : endTime;
+                LocalTime finalStartTime = startTime;
+                LocalTime finalEndTime = endTime;
+                log.info("{}, {}, {}, {}", finalStartDate, finalEndDate, startTime, endTime);
+                Predicate<Meal> filter = meal1 ->
+                        meal1.getDate().isAfter(finalStartDate) &&
+                                meal1.getDate().isBefore(finalEndDate) &&
+                                meal1.getTime().isAfter(finalStartTime) &&
+                                meal1.getTime().isBefore(finalEndTime)
+                        ;
+                request.setAttribute("meals", controller.getFilterByPredicate(filter));
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
             case "all":
             default:

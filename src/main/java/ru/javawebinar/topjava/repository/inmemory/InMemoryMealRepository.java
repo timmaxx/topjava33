@@ -5,7 +5,8 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.MealsUtil;
 
-import java.util.Collection;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
@@ -60,9 +61,15 @@ public class InMemoryMealRepository extends InMemoryBaseRepository<Meal> impleme
     @Override
     public Collection<Meal> getAll(int userId) {
         log.info("getAll");
+        return getFilterByPredicate(userId, meal -> true);
+    }
+
+    @Override
+    public List<Meal> getFilterByPredicate(int userId, Predicate<Meal> filter) {
         return repository.values()
                 .stream()
                 .filter(meal -> meal.getUserId() == userId)
+                .filter(filter)
                 .sorted((m1, m2) -> m2.getDateTime().compareTo(m1.getDateTime()))
                 .collect(Collectors.toList());
     }
