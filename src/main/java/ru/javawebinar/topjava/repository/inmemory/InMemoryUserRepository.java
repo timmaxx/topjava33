@@ -11,6 +11,30 @@ import java.util.stream.Collectors;
 @Repository
 public class InMemoryUserRepository extends InMemoryBaseRepository<User> implements UserRepository {
     @Override
+    public User save(User obj) {
+        log.info("save {}", obj);
+        if (obj.isNew()) {
+            obj.setId(counter.incrementAndGet());
+            repository.put(obj.getId(), obj);
+            return obj;
+        }
+        // handle case: update, but not present in storage
+        return repository.computeIfPresent(obj.getId(), (id, oldObj) -> obj);
+    }
+
+    @Override
+    public boolean delete(int id) {
+        log.info("delete {}", id);
+        return repository.remove(id) != null;
+    }
+
+    @Override
+    public User get(int id) {
+        log.info("get {}", id);
+        return repository.get(id);
+    }
+
+    @Override
     public List<User> getAll() {
         log.info("getAll");
         return repository.values()
