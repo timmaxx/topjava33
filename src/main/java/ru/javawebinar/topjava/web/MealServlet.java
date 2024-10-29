@@ -24,14 +24,19 @@ import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
+    private ConfigurableApplicationContext appCtx;
 
     private MealRestController controller;
 
     @Override
     public void init() {
-        try (ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml")) {
-            controller = appCtx.getBean(MealRestController.class);
-        }
+        appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml");
+        controller = appCtx.getBean(MealRestController.class);
+    }
+
+    @Override
+    public void destroy() {
+        appCtx.close();
     }
 
     @Override
@@ -94,8 +99,7 @@ public class MealServlet extends HttpServlet {
                         meal1.getDate().isAfter(finalStartDate) &&
                                 meal1.getDate().isBefore(finalEndDate) &&
                                 meal1.getTime().isAfter(finalStartTime) &&
-                                meal1.getTime().isBefore(finalEndTime)
-                        ;
+                                meal1.getTime().isBefore(finalEndTime);
                 request.setAttribute("meals", controller.getFilterByPredicate(filter));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;

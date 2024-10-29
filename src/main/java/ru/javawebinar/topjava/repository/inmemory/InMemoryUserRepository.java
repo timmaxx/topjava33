@@ -25,6 +25,7 @@ public class InMemoryUserRepository extends InMemoryBaseRepository<User> impleme
     @Override
     public boolean delete(int id) {
         log.info("delete {}", id);
+        //  ToDo:   А как будет удалена еда для этого пользователя?
         return repository.remove(id) != null;
     }
 
