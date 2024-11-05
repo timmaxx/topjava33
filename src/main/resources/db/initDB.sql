@@ -21,19 +21,19 @@ CREATE TABLE user_role
 (
     user_id INTEGER NOT NULL,
     role    VARCHAR NOT NULL,
-    CONSTRAINT user_roles_idx UNIQUE (user_id, role),
+    CONSTRAINT user_unique_roles_idx UNIQUE (user_id, role),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE meals
 (
-    id               INTEGER PRIMARY KEY DEFAULT nextval('global_seq'),
-    user_id          INTEGER                           NOT NULL,
-    datetime         TIMESTAMP                         NOT NULL,
-    description      VARCHAR                           NOT NULL,
-    calories         INTEGER                           NOT NULL,
+    id          INTEGER PRIMARY KEY DEFAULT nextval('global_seq'),
+    user_id     INTEGER   NOT NULL,
+    date_time   TIMESTAMP NOT NULL,
+    description VARCHAR   NOT NULL,
+    calories    INTEGER   NOT NULL,
 
-    CONSTRAINT user_datetime_idx UNIQUE (user_id, datetime),
+    CONSTRAINT meals_unique_user_datetime_idx UNIQUE (user_id, date_time),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
