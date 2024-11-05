@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
@@ -35,14 +37,15 @@ public class JdbcMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
-        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource()
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("id", meal.getId())
                 .addValue("user_id", userId)
                 .addValue("date_time", meal.getDateTime())
                 .addValue("description", meal.getDescription())
                 .addValue("calories", meal.getCalories());
+
         if (meal.isNew()) {
-            Number newKey = insertMeal.executeAndReturnKey(mapSqlParameterSource);
+            Number newKey = insertMeal.executeAndReturnKey(sqlParameterSource);
             meal.setId(newKey.intValue());
         } else if (namedParameterJdbcTemplate.update(
                 "UPDATE meals" +
@@ -50,7 +53,7 @@ public class JdbcMealRepository implements MealRepository {
                         "    , description = :description" +
                         "    , calories = :calories " +
                         "WHERE id = :id" +
-                        "  AND user_id = :user_id", mapSqlParameterSource) == 0) {
+                        "  AND user_id = :user_id", sqlParameterSource) == 0) {
             return null;
         }
 
